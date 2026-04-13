@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Heart Particles</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+        }
+
+        svg {
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+
+        #center-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fefbfb;
+            font-size: 30px;
+            font-family: "Segoe UI", sans-serif;
+            font-weight: bold;
+            text-shadow: 0 0 30px #faf6f8, 0 0 60px #fcfafb;
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <svg viewBox="0 0 600 552">
+        <path
+            d="M300,520 C-180,200 150,-120 300,130 C450,-120 780,200 300,520 Z"
+            fill="none"
+            stroke="none"
+        />
+    </svg>
+
+    <div id="center-text">❤️</div>
+
+    <script>
+        console.clear();
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(
+            75,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            5000
+        );
+        camera.position.z = 500;
+
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
+        renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const controlsWebGL = new THREE.OrbitControls(camera, renderer.domElement);
+
+        const tl = gsap.timeline({
+            repeat: -1,
+            yoyo: true
+        });
+
+        const path = document.querySelector("path");
+        const length = path.getTotalLength();
+        const vertices = [];
+
+        for (let i = 0; i < length; i += 0.1) {
+            const point = path.getPointAtLength(i);
+            const vector = new THREE.Vector3(point.x, -point.y, 0);
+            vector.x += (Math.random() - 0.5) * 30;
+            vector.y += (Math.random() - 0.5) * 30;
+            vector.z += (Math.random() - 0.5) * 70;
+            vertices.push(vector);
+
+            tl.from(vector, {
+                x: 600 / 2,
+                y: -552 / 2,
+                z: 0,
+                ease: "power2.inOut",
+                duration: "random(3, 6)"
+            }, i * 0.002);
+        }
+
+        const geometry = new THREE.BufferGeometry().setFromPoints(vertices);
+        const material = new THREE.PointsMaterial({
+            color: 0xffffff,
+            blending: THREE.AdditiveBlending,
+            size: 3
+        });
+
+        const particles = new THREE.Points(geometry, material);
+        particles.position.x -= 600 / 2;
+        particles.position.y += 552 / 2;
+        scene.add(particles);
+
+        gsap.fromTo(scene.rotation, {
+            y: -0.2
+        }, {
+            y: 0.2,
+            repeat: -1,
+            yoyo: true,
+            ease: 'power2.inOut',
+            duration: 3
+        });
+
+        function render() {
+            requestAnimationFrame(render);
+            geometry.setFromPoints(vertices);
+            renderer.render(scene, camera);
+
+            gsap.to("#center-text", {
+                opacity: 1,
+                scale: 1.2,
+                duration: 0.6,
+                yoyo: true,
+                repeat: -1,
+                ease: "power1.inOut"
+            });
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        render();
+        window.addEventListener('resize', onWindowResize);
+    </script>
+</body>
+</html>
