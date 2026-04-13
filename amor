@@ -29,7 +29,7 @@
             font-size: 30px;
             font-family: "Segoe UI", sans-serif;
             font-weight: bold;
-            text-shadow: 0 0 30px #faf6f8, 0 0 60px #fcfafb;
+            text-shadow: 0 0 30px #ff0000, 0 0 60px#ff0000;
             opacity: 0;
             pointer-events: none;
         }
